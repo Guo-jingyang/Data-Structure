@@ -14,6 +14,7 @@ int main(void)
 
     while (fgets(input, sizeof(input), stdin) != NULL)
     {
+        //读入数据
         int num, count = 0;
         char *token = strtok(input, " ");
         while (token != NULL)
@@ -27,7 +28,6 @@ int main(void)
         arrange(numbers, count);
 
         //输出
-        //printf("%d\n", count);
         for (int i=0; i<count; i++)
         {
             printf ("%d", numbers[i]);
@@ -45,7 +45,34 @@ int main(void)
 
 void arrange(int *numbers, int count)
 {
-    
+    int low = 0, mid = 0, high = count - 1;
+    while (mid <= high)
+    {
+        int mod = numbers[mid] % 3;
+        if (mod == 2 || numbers[mid] == -1)
+        {
+            int temp = numbers[low];
+            numbers[low] = numbers[mid];
+            numbers[mid] = temp;
+            low++;
+            mid++;
+        }
+
+        else if (mod == 0)
+        {
+            mid++;
+        }
+
+        else if (mod == 1 || numbers[mid] == -2)
+        {
+            int temp = numbers[mid];
+            numbers[mid] = numbers[high];
+            numbers[high] = temp;
+            high--;
+        }
+    }
 }
 
-//得考虑负数，而且-1/3余数是2
+// 注意负数的情况
+// 算法：三路划分算法
+// 母题：荷兰国旗问题
