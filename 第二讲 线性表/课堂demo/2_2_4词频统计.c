@@ -26,7 +26,10 @@ int main(void)
 {
     ElemType list[MAX_SIZE];
     FILE *fp = fopen("test.txt", "r+");
-    if (fp == NULL) return 0;
+    if (fp == NULL) {
+        fprintf(stderr, "Error: Cannot open file.\n");
+        return 0;
+    }
     char w[MAX_WORD]; //副本,传参时w始终指向数组第一个元素
     while (GetWord(fp, w)!=EOF) {
         InsertWord(list, w);
@@ -46,11 +49,17 @@ int GetWord(FILE *fp, char *w)
         if (ch == EOF) return ch;
         else continue;
     }
+    int i = 0;
     do {
-        *w = tolower(ch);
-        w++;
+        if (i<MAX_WORD - 1) { //'\0'
+            w[i] = tolower(ch);
+            i++; //单词可能会过长造成溢出
+        }
+        else {
+            fprintf(stderr, "Warning: Word overflow.\n");
+        }
     } while (isalpha(ch=fgetc(fp)));
-    *w = '\0';
+    w[i] = '\0'; //注意
 
     return 1;
 }
@@ -76,7 +85,10 @@ int SearchWord(ElemType list[], char *w)
 
 int InsertWord(ElemType list[], char *w)
 {
-    if (n == MAX_SIZE) return 0;
+    if (n == MAX_SIZE) {
+        fprintf(stderr, "Error: List is full.\n");
+        return 0;
+    }
     int i = SearchWord(list, w);
     if (strcmp(list[i].word, w)==0) {
         list[i].count++;
@@ -93,3 +105,4 @@ int InsertWord(ElemType list[], char *w)
 
     return 1;
 }
+
