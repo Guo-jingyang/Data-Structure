@@ -1,0 +1,3 @@
+  print 8 exam data-structure = exam
+abc print * =
+count a (m)a
