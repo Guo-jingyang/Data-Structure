@@ -76,6 +76,7 @@ int SearchWord(ElemType list[], char *w)
 
 int InsertWord(ElemType list[], char *w)
 {
+    if (n == MAX_SIZE) return 0;
     int i = SearchWord(list, w);
     if (strcmp(list[i].word, w)==0) {
         list[i].count++;
