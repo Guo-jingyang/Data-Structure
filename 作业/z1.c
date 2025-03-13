@@ -11,6 +11,8 @@ typedef struct Node NODE;
 int AppendNode(NODE *, int item);
 int FreeList(NODE *);
 int PrintList(NODE *);
+int InsertNode(NODE *, int item);
+int ReturnLastk(NODE *, int k);
 
 int main(void)
 {
@@ -22,10 +24,12 @@ int main(void)
     
     for (int i=0; i<5; i++)
     {
-        AppendNode(list, i+1);
+        AppendNode(list, 3*i+1);
     }
 
-    PrintList(list->next);
+    PrintList(list);
+    printf("-----------------------------\n");
+    printf("Last k: %d", ReturnLastk(list, 2));
     FreeList(list);
     return 1;
 }
@@ -33,6 +37,7 @@ int main(void)
 int AppendNode(NODE *list, int item)
 {
     NODE *q = malloc(sizeof(NODE));
+    if (!q) return 0;
     q->elem = item;
     q->next = NULL;
 
@@ -57,9 +62,37 @@ int FreeList(NODE *list)
 int PrintList(NODE *list)
 {
     NODE *p;
-    for (p=list; p!=NULL; p=p->next)
+    for (p=list->next; p!=NULL; p=p->next)
     {
         printf("%d\n", p->elem);
     }
     return 1;
 }
+
+int InsertNode(NODE *list, int item)
+{
+    NODE *p, *q=list;
+    for (p=list->next; p->elem<item && p!=NULL; q=p, p=p->next);
+
+    NODE *r = malloc(sizeof(NODE));
+    if (!r) return 0;
+    r->elem = item;
+    r->next = p;
+    q->next = r;
+    return 1;
+}
+
+int ReturnLastk(NODE *list, int k)
+{
+    int i = 1;
+    NODE *p, *q = list;
+    for (p=list; p!=NULL; p=p->next)
+    {
+        if (i>k) q=q->next;
+        i++;
+    }
+
+    return q->elem;
+}
+
+// (elem, p) (elem, next) (elem, NULL)
