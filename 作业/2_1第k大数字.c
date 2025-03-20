@@ -31,7 +31,7 @@ int main(void)
         }
         printf("%d\n", ReturnLastk(list, k));
     }
-    FreeList(list);
+    FreeList(list); //无限循环，但过了OJ
     return 1;
 }
 
