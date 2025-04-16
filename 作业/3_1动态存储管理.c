@@ -1,180 +1,155 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-int MAX_LINE_LENGTH = 65535;
-int MAX_NUMBERS = 65535;
 
-
-struct mem
+struct Node
 {
-	int size;
-	struct mem* left;
-	struct mem* right;
+    int space;
+    struct Node *prev;
+    struct Node *next;
 };
+typedef struct Node NODE;
 
-
-struct mem* create_mem (struct mem* head, int size)
+int AppendNode(NODE *list, int item)
 {
-	struct mem* memory = (struct mem*)malloc(sizeof(struct mem));
-	memory -> size = size;
-	memory -> left = NULL;
-	memory -> right = NULL;
-	
-	
-	if (head == NULL)
-	{
-		return memory;
-	}
-	
-	
-	struct mem* pointer = head;
-	while (pointer -> right != NULL)
-	{
-		pointer = pointer -> right;
-	}
-	memory -> left = pointer;
-	pointer -> right = memory;
-	return head;
+    NODE *r = malloc(sizeof(NODE));
+    r->space = item;
+    r->next = NULL;
+
+    NODE *p;
+    for (p=list; p->next!= NULL; p=p->next);
+    p->next = r;
+    r->prev = p;
+    return 1;
 }
 
-
-int main()
+int main(void)
 {
-	// 读取初始内存空白区 
-	char input[MAX_LINE_LENGTH];
-	int numbers[MAX_NUMBERS];
-	fgets(input, sizeof(input), stdin);
-	int num, count = 0;
-	char* token = strtok(input, " \n");
-	while (token != NULL)
-	{
-		num = atoi(token);
-		numbers[count++] = num;
-		token = strtok(NULL, " \n");
-	}
-	
-	
-	// 创建链表，但首尾尚未连接 
-	struct mem* head = NULL;
-	head = create_mem(head, numbers[0]);
-	for (int i=1; i<count; i++)
-	{
-		create_mem(head, numbers[i]);
-	}
-	
-	
-	// 首尾相连 
-	struct mem* lpointer, *rpointer;
-	rpointer = head;
-	while (rpointer -> right != NULL)
-	{
-		rpointer = rpointer -> right;
-	}
-	head -> left = rpointer;
-	rpointer -> right = head;
-	
-	
-	int mergedsize = -1; // 合并后的内存的大小，若为-1，则说明尚未合并 
-	int alloc, size; // 未进行内存合并时，每次循环中记录剩余内存总量 
-	while (fgets(input, sizeof(input), stdin) != NULL)
-	{
-		// 读取分配的内存大小 
-		char* token = strtok(input, " \n");
-		alloc = atoi(token);
-		
-		
-		if (mergedsize == -1)
-		{ // 未进行过内存合并则执行 
-			if (head -> size >= alloc) // 头节点内存足够 
-			{
-				head -> size -= alloc;
-				printf("%d\n", head -> size);
-				
-				
-				if (head -> size == 0) // 头节点移除
-				{
-					if (head -> right != head) // 若链表不为空，头节点转移 
-					{
-						head -> right -> left = head -> left;
-						head -> left -> right = head -> right;
-						rpointer = head -> right;
-						free(head);
-						head = rpointer;
-					}
-					else // 移除链表，确保不再访问链表
-					{
-						free(head);
-						mergedsize = 0;
-					}
-				}
-			}
-			
-			
-			else
-			{
-				lpointer = head -> left;
-				rpointer = head -> right;
-				size = head -> size; 
-				
-				 
-				while (lpointer != head) // 到达头节点说明此时需要进行内存合并 
-				{
-					size += lpointer -> size;
-					if (lpointer -> size >= alloc) // 左侧成功分配
-					{
-						lpointer -> size -= alloc;
-						printf("%d\n", lpointer -> size);
-						if (lpointer -> size == 0) // 节点移除
-						{
-							lpointer -> right -> left = lpointer -> left;
-							lpointer -> left -> right = lpointer -> right;
-							free(lpointer);
-						}
-						break;
-					}
-					if (rpointer -> size >= alloc) // 右侧成功分配
-					{
-						rpointer -> size -= alloc;
-						printf("%d\n", rpointer -> size);
-						if (rpointer -> size == 0) // 节点移除
-						{
-							rpointer -> right -> left = rpointer -> left;
-							rpointer -> left -> right = rpointer -> right;
-							free(rpointer);
-						}
-						break;
-					}
-					lpointer = lpointer -> left; // 指针转移 
-					rpointer = rpointer -> right;
-				}
-				
-				
-				if (lpointer == head) // 到达头节点时需要合并内存
-				{
-					mergedsize = size;
-					if (mergedsize >= alloc)
-					{
-						mergedsize -= alloc;
-						printf("%d\n", mergedsize);
-					}
-					else printf("memory out\n");
-				}
-			}
-		}
-		
-		
-		else // 已经进行过内存合并则执行 
+    char str[1024];
+    fgets(str, sizeof(str), stdin);
+    char *token = strtok(str, " \n");
+
+    NODE *list = malloc(sizeof(NODE));
+    list->space = atoi(token);
+    list->prev = NULL;
+    list->next = NULL;
+    token = strtok(NULL, " \n");
+
+    while (token != NULL)
+    {
+        AppendNode(list, atoi(token));
+        token = strtok(NULL, " \n");
+    }
+
+    NODE *p;
+    for (p=list; p->next!=NULL; p=p->next);
+    p->next = list;
+    list->prev = p; //双向循环链表构建完成
+
+
+
+
+
+    int merged_size = -1;
+    int size;
+
+    char input[1024];
+    while (fgets(input, sizeof(input), stdin) != NULL)
+    {
+        char *token = strtok(input, " \n");
+        int n = atoi(token);
+
+
+        if (merged_size == -1)
+        {
+            if (list->space>=n)
+            {
+                list->space -= n;
+                printf("%d\n", list->space);
+                if (list->space == 0)
+                {
+                    if (list->next != list)
+                    {
+                        NODE *temp = list;
+                        list->next->prev = list->prev;
+                        list->prev->next = list->next;
+                        list = list->next;
+                        free(temp);
+                    }
+
+                    else
+                    {
+                        free(list);
+                        merged_size = 0;
+                    }
+                }
+
+                continue;
+            }
+
+
+            NODE *q = list->prev;
+            NODE *p = list->next;
+            size = list->space;
+
+            while (q != list) //
+            {
+                size += q->space; //
+
+                if (q->space >= n)
+                {
+                    q->space -= n;
+                    printf("%d\n", q->space);
+                    if (q->space == 0)
+                    {
+                        q->prev->next = q->next;
+                        q->next->prev = q->prev;
+                        free(q);
+                    }
+                    break;
+                }
+
+                else if (p->space>=n)
+                {
+                    p->space -= n;
+                    printf("%d\n", p->space);
+                    if (p->space == 0)
+                    {
+                        p->prev->next = p->next;
+                        p->next->prev = p->prev;
+                        free(p);
+                    }
+                    break;
+                }
+
+                q = q->prev;
+                p = p->next;
+            }
+
+
+            if (q == list) //
+            {
+                merged_size = size;
+                if (merged_size >= n)
+                {
+                    merged_size -= n;
+                    printf("%d\n", merged_size);
+                }
+                else printf("memory out\n");
+            }
+        }
+
+        else // 已经进行过内存合并则执行 
 		{
-			if (mergedsize >= alloc)
+			if (merged_size >= n)
 			{
-				mergedsize -= alloc;
-				printf("%d\n", mergedsize);
+				merged_size -= n;
+				printf("%d\n", merged_size);
 			}
 			else printf("memory out\n");
 		}
-	}
+    }
+
+    //
+    return 0;
 }
-
-
-
-
